@@ -1,3 +1,8 @@
+### IntenX
+IntenX creates a platform for users to express their intent and get solved using the Dutch Auction protocol at IntenX. On chain orders are routed through 1inch Fusion and Cross-Chain Dutch Auction is built from scratch using CCIP.
+
+
+
 ## Foundry
 
 **Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
