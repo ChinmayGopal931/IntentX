@@ -1,5 +1,5 @@
-### IntenX
-IntenX creates a platform for users to express their intent and get solved using the Dutch Auction protocol at IntenX. On chain orders are routed through 1inch Fusion and Cross-Chain Dutch Auction is built from scratch using CCIP.
+### IntentX
+IntentX creates a platform for users to express their intent and get solved using the Dutch Auction protocol at IntentX. On chain orders are routed through 1inch Fusion and Cross-Chain Dutch Auction is built from scratch using CCIP.
 
 
 
