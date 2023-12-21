@@ -96,7 +96,7 @@ contract DutchXTest is Test {
         deal(solver, 1 ether);
         wstETH.approve(address(dutchXBase), 996666666666666697);
 
-        dutchXBase.executeOrder{value: 0.09 etherg}(
+        dutchXBase.executeOrder{value: 0.09 }(
             ETH_CHAIN_ID, "blah blah black sheep", user, address(wstETH), 996666666666666697
         );
         vm.stopPrank();
