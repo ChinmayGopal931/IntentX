@@ -46,7 +46,7 @@ struct ExecutedOrder {
     uint256 executedTime;
 }
 
-contract DutchX is CCIPReceiver {
+contract IntentX is CCIPReceiver {
     uint256 public constant SOLVER_PERIOD = 3 minutes;
     IRouterClient public ccipRouter;
 
@@ -78,14 +78,17 @@ contract DutchX is CCIPReceiver {
         ClaimedOrder storage claimedOrder = claimedOrders[order.orderId];
 
         console.log(order.nonce, "nonce");
-        require(signer == order.from, "dutchX/invalid signature");
-        require(order.nonce == userNonce[signer], "dutchX/invalid nonce");
-        require(order.fromChainId == block.chainid, "dutchX/invalid from chain id");
-        require(claimedOrder.solver == address(0), "dutchX/order already claimed");
-        require(block.timestamp < order.creationTimestamp + order.duration, "dutchX/order expired");
+        console.log("1111111");
+        console.log("eeeee");
+        require(signer == order.from, "IntentX/invalid signature");
+        require(order.nonce == userNonce[signer], "IntentX/invalid nonce");
+        require(order.fromChainId == block.chainid, "IntentX/invalid from chain id");
+        require(claimedOrder.solver == address(0), "IntentX/order already claimed");
+        require(block.timestamp < order.creationTimestamp + order.duration, "IntentX/order expired");
 
         uint256 toAmount =
             calculateToAmount(order.startingPrice, order.endingPrice, order.duration, order.creationTimestamp);
+        console.log(order.nonce, "nonce");
 
         claimedOrder.from = order.from;
         claimedOrder.solver = msg.sender;
@@ -97,6 +100,7 @@ contract DutchX is CCIPReceiver {
         claimedOrder.toAmount = toAmount;
         claimedOrder.stakeAmount = order.stakeAmount;
         claimedOrder.deadline = block.timestamp + SOLVER_PERIOD;
+        console.log(order.nonce, "nonce");
 
         unchecked {
             ++userNonce[signer];
@@ -104,6 +108,7 @@ contract DutchX is CCIPReceiver {
 
         IERC20(claimedOrder.fromToken).transferFrom(claimedOrder.from, address(this), claimedOrder.fromAmount);
         IERC20(claimedOrder.fromToken).transferFrom(claimedOrder.solver, address(this), claimedOrder.stakeAmount);
+        console.log(order.nonce, "nonce");
 
         emit OrderCreated(claimedOrder);
     }
@@ -112,6 +117,7 @@ contract DutchX is CCIPReceiver {
         external
         payable
     {
+        console.log(111111);
         uint64 fromChainIdCasted = chainlinkChainId[fromChainId];
 
         IERC20 tokenContract = IERC20(token);
@@ -119,7 +125,11 @@ contract DutchX is CCIPReceiver {
         tokenContract.transferFrom(msg.sender, user, amount);
         uint256 userBalanceAfter = tokenContract.balanceOf(user);
 
-        require(userBalanceAfter - userBalanceBefore >= amount, "dutchX/revert transfer from");
+        console.log("iemdiemd");
+
+        console.log(userBalanceAfter, userBalanceBefore, amount, "meow");
+
+        require(userBalanceAfter - userBalanceBefore >= amount, "IntentX/revert transfer from");
 
         ExecutedOrder memory executedOrder = ExecutedOrder(orderHash, user, msg.sender, token, amount, block.timestamp);
         /// construct the ccip message
@@ -140,10 +150,10 @@ contract DutchX is CCIPReceiver {
         ExecutedOrder memory orderExecuted = abi.decode(message.data, (ExecutedOrder));
         ClaimedOrder storage claimedOrder = claimedOrders[orderExecuted.orderHash];
 
-        require(!claimedOrder.isCompleted, "dutchX/already executed");
+        require(!claimedOrder.isCompleted, "IntentX/already executed");
         require(
             claimedOrder.toToken == orderExecuted.token && claimedOrder.toAmount <= orderExecuted.amount,
-            "dutchX/ invalid filling on remote chain"
+            "IntentX/ invalid filling on remote chain"
         );
         claimedOrder.isCompleted = true;
 

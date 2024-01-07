@@ -2,14 +2,14 @@
 pragma solidity ^0.8.13;
 
 import {Test, console2} from "forge-std/Test.sol";
-import "src/DutchX.sol";
+import "src/IntentX.sol";
 import {MockERC20} from "./mocks/MockERC20.sol";
 
 import "forge-std/console.sol";
 
-contract DutchXTest is Test {
-    DutchX public dutchXETH;
-    DutchX public dutchXBase;
+contract IntentXTest is Test {
+    IntentX public dutchXETH;
+    IntentX public dutchXBase;
 
     MockERC20 public usdt;
     MockERC20 public wstETH;
@@ -24,25 +24,25 @@ contract DutchXTest is Test {
     address solver;
 
     function setUp() external {
-        user = vm.addr(vm.envUint("PRIVATE_KEY"));
-        solver = vm.addr(vm.envUint("SOLVER_PRIVATE_KEY"));
+        //user = vm.addr(vm.envUint("PRIVATE_KEY"));
+        //solver = vm.addr(vm.envUint("SOLVER_PRIVATE_KEY"));
 
         ETH_FORK = vm.createSelectFork(vm.envString("ETH_RPC"));
-        dutchXETH = DutchX(0xc1E262C291229db17B8C17c4a598869Ee48d9Dac);
+        dutchXETH = new IntentX(0x0BF3de8C5d3E8a2b34D2BeEb17ABFcebAf363a58);
         usdt = MockERC20(0xfb8c7dD1E47b57a3308f52B55244f974b1E319A0);
         // usdt.transfer(user, 50e18);
         // usdt.transfer(solver, 50e18);
 
         BASE_FORK = vm.createSelectFork(vm.envString("BASE_RPC"));
-        dutchXBase = DutchX(0x668Cb4EadBAc6F9b78C67924499C8de16749F351);
+        dutchXBase = new IntentX(0x80AF2F44ed0469018922c9F483dc5A909862fdc2);
         wstETH = MockERC20(0xfb8c7dD1E47b57a3308f52B55244f974b1E319A0);
         // wstETH.transfer(solver, 50e18);
 
-        // vm.selectFork(ETH_FORK);
-        // dutchXETH.setReceiver(5790810961207155433, address(dutchXBase));
+        //  vm.selectFork(ETH_FORK);
+        //  dutchXETH.setReceiver(5790810961207155433, address(dutchXBase));
 
-        // vm.selectFork(BASE_FORK);
-        // dutchXBase.setReceiver(16015286601757825753, address(dutchXETH));
+        //  vm.selectFork(BASE_FORK);
+        //  dutchXBase.setReceiver(16015286601757825753, address(dutchXETH));
     }
 
     function test_decode() external {
@@ -56,9 +56,19 @@ contract DutchXTest is Test {
     }
 
     function test_validOrder() external {
+
+
+        console.log("work");
+
+        console.log(address(dutchXETH), "addy");
+
         vm.selectFork(ETH_FORK);
+
         vm.startPrank(user);
         usdt.approve(address(dutchXETH), 11e18);
+        console.log("work2");
+
+        console.log(address(dutchXETH), "addy");
         UserOrder memory order = UserOrder(
             user,
             ETH_CHAIN_ID,
@@ -72,7 +82,7 @@ contract DutchXTest is Test {
             block.timestamp - 40 seconds,
             180 seconds,
             0,
-            "blah blah black sheep"
+            "blah blah black sheep had a big fall"
         );
 
         bytes32 digest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", keccak256(abi.encode(order))));
@@ -85,19 +95,22 @@ contract DutchXTest is Test {
         console.logBytes(abi.encode(order));
         vm.stopPrank();
 
+        console.log("before");
+
         vm.startPrank(solver);
         usdt.approve(address(dutchXETH), 11e18);
         dutchXETH.claimOrder(abi.encode(order), signature);
-
         vm.stopPrank();
+
+        console.log("after");
 
         vm.selectFork(BASE_FORK);
         vm.startPrank(solver);
         deal(solver, 1 ether);
         wstETH.approve(address(dutchXBase), 996666666666666697);
 
-        dutchXBase.executeOrder{value: 0.09 }(
-            ETH_CHAIN_ID, "blah blah black sheep", user, address(wstETH), 996666666666666697
+        dutchXBase.executeOrder{value: 2 }(
+            ETH_CHAIN_ID, "blah blah black sheep had a big fall", user, address(wstETH), 996666666666666697
         );
         vm.stopPrank();
 
