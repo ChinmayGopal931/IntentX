@@ -77,9 +77,6 @@ contract IntentX is CCIPReceiver {
         UserOrder memory order = abi.decode(encodedUserOrder, (UserOrder));
         ClaimedOrder storage claimedOrder = claimedOrders[order.orderId];
 
-        console.log(order.nonce, "nonce");
-        console.log("1111111");
-        console.log("eeeee");
         require(signer == order.from, "IntentX/invalid signature");
         require(order.nonce == userNonce[signer], "IntentX/invalid nonce");
         require(order.fromChainId == block.chainid, "IntentX/invalid from chain id");
@@ -88,7 +85,6 @@ contract IntentX is CCIPReceiver {
 
         uint256 toAmount =
             calculateToAmount(order.startingPrice, order.endingPrice, order.duration, order.creationTimestamp);
-        console.log(order.nonce, "nonce");
 
         claimedOrder.from = order.from;
         claimedOrder.solver = msg.sender;
@@ -100,7 +96,6 @@ contract IntentX is CCIPReceiver {
         claimedOrder.toAmount = toAmount;
         claimedOrder.stakeAmount = order.stakeAmount;
         claimedOrder.deadline = block.timestamp + SOLVER_PERIOD;
-        console.log(order.nonce, "nonce");
 
         unchecked {
             ++userNonce[signer];
@@ -108,7 +103,6 @@ contract IntentX is CCIPReceiver {
 
         IERC20(claimedOrder.fromToken).transferFrom(claimedOrder.from, address(this), claimedOrder.fromAmount);
         IERC20(claimedOrder.fromToken).transferFrom(claimedOrder.solver, address(this), claimedOrder.stakeAmount);
-        console.log(order.nonce, "nonce");
 
         emit OrderCreated(claimedOrder);
     }
@@ -117,15 +111,21 @@ contract IntentX is CCIPReceiver {
         external
         payable
     {
-        console.log(111111);
         uint64 fromChainIdCasted = chainlinkChainId[fromChainId];
 
+
         IERC20 tokenContract = IERC20(token);
+
+        console.log("balan bef", tokenContract.balanceOf(msg.sender));
+        console.log("balan bef", tokenContract.balanceOf(user));
+        console.log(address(tokenContract));
+        console.log(msg.sender, user);
+
         uint256 userBalanceBefore = tokenContract.balanceOf(user);
         tokenContract.transferFrom(msg.sender, user, amount);
         uint256 userBalanceAfter = tokenContract.balanceOf(user);
 
-        console.log("iemdiemd");
+
 
         console.log(userBalanceAfter, userBalanceBefore, amount, "meow");
 
@@ -141,7 +141,12 @@ contract IntentX is CCIPReceiver {
             abi.encodeWithSelector(0x97a657c9, Client.EVMExtraArgsV1({gasLimit: 500_000, strict: false}))
         );
 
+        console.log("beofre ccip");
+
         ccipRouter.ccipSend{value: ccipRouter.getFee(fromChainIdCasted, message)}(fromChainIdCasted, message);
+
+        console.log("after ccip");
+
         emit OrderExecuted(executedOrder);
     }
 
