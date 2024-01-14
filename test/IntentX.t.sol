@@ -86,7 +86,7 @@ contract IntentXTest is Test {
             block.timestamp - 40 seconds,
             180 seconds,
             0,
-            "blah blah black sheep had a big fall"
+            "blah blah black sheep"
         );
 
         bytes32 digest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", keccak256(abi.encode(order))));
